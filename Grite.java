@@ -1,9 +1,19 @@
-package uds.grite;
+package uds.grite.Itemset;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-
+/**
+ * 
+ * @author 
+ * The class encapsulates an implementation of the Grite algorithm
+ * to compute Gradual frequent itemsets.
+ * @author tabueu  laurent, University of DSCHANG, 2017
+ * @copyright GNU General Public License v3
+ * No reproduction in whole or part without maintaining this copyright notice
+ * and imposing this condition on any subsequent users.
+ *
+ */
 public class Grite {
 	private int nbitems = 3;
 	private int nbtransaction = 8;
