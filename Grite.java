@@ -1,8 +1,13 @@
 package uds.grite.Itemset;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 /**
  * 
  * @author 
@@ -16,43 +21,30 @@ import java.util.Iterator;
  */
 public class Grite {
 	private int nbitems = 3;
-	private int nbtransaction = 8;
+	private int nbtransaction = 9;
 	/** the list of current itemsets */
 	public ArrayList<float[]> itemsets = new ArrayList<>();
 	/** the name of the transcation file */
 	private String transaFile;
-	 static ArrayList<int[][]> allContengent= new ArrayList<>();
+	static ArrayList<int[][]> allContengent= new ArrayList<>();
 	float[][] dataset;
 	float[] item;
 	int taille= 9;
 	int a = 3;
+	private String transafile = "transa.dat"; // default transaction file
+	private String configfile = "config.dat"; // default configuration file
 
 	/*
 	 * 1. Génération des 1-itemsets graduels : pour chaque item i de la base DB,
-	 * l’item graduel i ≥ est construit en ordonnant les t O [i] selon la
+	 * l’item graduel i ≥ est construit en ordonnant les tO [i] selon la
 	 * relation d’ordre ≥,
 	 */
 
-	public Grite() {
+	public Grite() throws IOException {
 		super();
 		//construct db
-		float[] cand1 = {-2,(float) -1.5,2};
-		float[] cand2 = {(float) -0.5,-1,2};
-		float[] cand3 = {-1 , (float) -1.5 ,1};
-		float[] cand4 = {(float) 0.5,(float) -0.5,2};
-		float[] cand5 = {1 , (float) -0.8 ,2};
-		float[] cand6 = {(float) 1.5 , 1  ,2};
-		float[] cand7 = {3 , 1  ,3};
-		float[] cand8 = {(float) 1.2 , 3  ,3};
-		itemsets.add(cand1);
-		itemsets.add(cand2);
-		itemsets.add(cand3);
-		itemsets.add(cand4);
-		itemsets.add(cand5);
-		itemsets.add(cand5);
-		itemsets.add(cand6);
-		itemsets.add(cand7);
-		itemsets.add(cand8);
+		getconfig();
+		this.itemsets = getDataSet();
 		//end of construction db
 		this.item= null;
 		this.dataset = Grite.duplique(itemsets);
@@ -63,7 +55,68 @@ public class Grite {
 		
 		
 	}
+	
+	/**
+	 * initialisation parameter of grite: number of item , number
+	 * of transaction
+	 * 
+	 * @throws IOException 
+	 */
+	public void getconfig() throws IOException {
+		FileInputStream file_in;
+		BufferedReader data_in;
+		String oneLine = "";
+		// open the config file and load the values
+		try {
+			file_in = new FileInputStream(configfile);
+			data_in = new BufferedReader(new InputStreamReader(file_in));
 
+			// number of transactions
+			oneLine = data_in.readLine();
+			nbtransaction = Integer.valueOf(oneLine).intValue();
+
+			// number of items
+			oneLine = data_in.readLine();
+			nbitems = Integer.valueOf(oneLine).intValue();
+			
+			// output configuration of the user
+			System.out.print("\nInput configuration: " + nbitems + " items,and  " + nbtransaction + " transactions. ");
+			System.out.println();
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+	}
+
+	/**
+	 * 
+	 * @return Dataset into transaction Data Source
+	 * @throws IOException
+	 */
+	public  ArrayList<float[]> getDataSet() throws IOException {
+		BufferedReader data_in;
+		String oneLine = "";
+
+		data_in = new BufferedReader(new InputStreamReader(new FileInputStream(transafile)));
+		for (int i = 0; i < nbtransaction; i++) {
+			float[] tmp = new float[nbitems];
+			oneLine = data_in.readLine(); // one transaction
+			StringTokenizer transaction = new StringTokenizer(oneLine, " "); 
+			float val;
+			int index = 0;
+			while (transaction.hasMoreElements()) {
+				Object object = (Object) transaction.nextElement();
+				val = Float.parseFloat((String) object);
+				tmp[index] = (val);
+				index ++;
+			}
+			itemsets.add(tmp);
+
+		}
+		data_in.close();
+		return itemsets;
+
+	}
+	
 	public static float[][] duplique(ArrayList<float[]> mat) {
 		float[][] res = new float[mat.size()][];
 		for (int i = 0; i < mat.size(); i++) {
