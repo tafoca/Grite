@@ -1,9 +1,28 @@
 package uds.grite.Itemset;
-
+/**
+ * @author tabueu Fotso Laurent
+ * 
+ */
 import java.util.ArrayList;
 
 public class Tools {
 	int i;
+	int[] memory;
+	int sizeMat =10;
+	
+	
+	public Tools() {
+		super();
+		initMemory();
+	}
+
+	public int getSizeMat() {
+		return sizeMat;
+	}
+
+	public void setSizeMat(int sizeMat) {
+		this.sizeMat = sizeMat;
+	}
 
 	public boolean lexicalComparaison(Character[] pattern1, Character[] pattern2) {
 
@@ -73,7 +92,7 @@ public class Tools {
 	public ArrayList<Integer> getSonNode(boolean[][] boolMatrix, int item) {
 		ArrayList<Integer> sons = new ArrayList<>();
 		for (int i = 0; i < boolMatrix.length; i++) {
-			if (boolMatrix[item][i]) {
+			if (boolMatrix[item][i]==true) {
 				sons.add(i);
 			}
 		}
@@ -90,21 +109,24 @@ public class Tools {
 	 *            root node to determine size of different way
 	 * @return
 	 */
-	public int sizeMaxWay(boolean[][] boolMatrix, Character[] pattern, int[] memory, int item) {
-		// intialisation of memory table
+	public void initMemory(){
+		memory = new int[sizeMat];
 		for (int i = 0; i < memory.length; i++) {
 			memory[i] = -1;
 		}
+	}
+	public int sizeMaxWay(boolean[][] boolMatrix,/* Character[] pattern, */int item) {
+		// intialisation of memory table
+		
 
-		ArrayList<Integer> sons = getSonNode(boolMatrix,
-				item); /* tous les o ′ de valeur 1 à la ligne o */
+		ArrayList<Integer> sons = getSonNode(boolMatrix,item); /* tous les o ′ de valeur 1 à la ligne o */
 		if (sons.size() == 0) {
 			memory[item] = 1;
 		} else {
 			for (Object element : sons) {
 				int son = (int) element;
-				if (memory[son] == -1) {
-					sizeMaxWay(boolMatrix, pattern, memory, son);
+				if (memory[son] == -1) {// pattern,memory,
+					sizeMaxWay(boolMatrix,son);
 				}
 			}
 
@@ -116,7 +138,40 @@ public class Tools {
 		return memory[item];
 
 	}
+	
+	
+	public  ArrayList<Object> getColum(boolean[][] dataset, int col) {
+		ArrayList<Object> item = new ArrayList<>();
+		
+		for (int i = 0; i < dataset.length; i++) {
+			item.add(dataset[i][col]);
+		}
 
+		return item;
+	}
+	
+// return all root nodes of graph
+	public ArrayList<Object> getRoots(boolean[][] src){
+		ArrayList<Object> res=new ArrayList<>();
+		ArrayList<Object> out=new ArrayList<>();
+		int j;
+		
+		for (int i = 0; i < src.length; i++) {
+			res =getColum(src,i);
+			boolean sentinnel = false;
+			for (j = 0; j < res.size(); j++) {
+				if ((boolean)res.get(j) ==true) {
+					sentinnel = true;
+				}
+			}
+			if (!sentinnel) {
+				out.add(i);
+			}
+		}
+		return out;
+		
+	}
+	
 	private int max(int j, int k) {
 		if (j > k) {
 			return j;
@@ -124,9 +179,21 @@ public class Tools {
 			return k;
 		}
 	}
-
+	//computation of support of all contengence matrix boolmatrix
+	public int maximumSupport(boolean[][] boolMatrix, Character[] pattern, int[] memory)
+	{ //pattern, memory,
+		int max = sizeMaxWay(boolMatrix, (int) getRoots(boolMatrix).get(0));
+		for (int i = 0; i < getRoots(boolMatrix).size(); i++) {//, pattern, memory,
+			int tmp = sizeMaxWay(boolMatrix, i);
+			if (max < tmp) {
+				max = tmp;
+			}
+		}
+		return max;
+	}
+	
 	public float supportCalculation(int nb, int total) {
-		return nb / total;
+		return (float)nb/total;
 	}
 	
 	 public boolean Apartient(ArrayList<Integer> tampon, int val){
