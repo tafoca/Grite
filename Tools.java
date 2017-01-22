@@ -1,4 +1,4 @@
-package uds.grite.Itemset;
+package uds.Grite;
 
 /**
  * @author tabueu Fotso Laurent

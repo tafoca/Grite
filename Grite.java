@@ -1,4 +1,4 @@
-package uds.grite.Itemset;
+package uds.Grite;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

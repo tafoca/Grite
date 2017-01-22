@@ -1,4 +1,4 @@
-package uds.grite.Itemset;
+package uds.Grite;
 
 import java.io.IOException;
 import java.util.ArrayList;
