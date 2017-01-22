@@ -14,7 +14,7 @@ The dataset used for test is **transa.dat** and **config.dat**, Which contain re
 
 ## Usage
 
-To run the program with dataset provided and default values for **threshold = 0.3**
+To run the program with dataset provided and default values for **threshold = 0.1**
 ## Using IDE:Eclipse
 	
 * Create new projet and two class named Tools.java and Grite.java, main class.
