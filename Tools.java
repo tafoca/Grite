@@ -220,7 +220,7 @@ public class Tools {
 	 */
 	public static String[] attributenames(int nbitem) {
 		String[] attrList = new String[nbitem];
-		String c = "1";
+		String c = "0";
 		for (int i = 0; i < attrList.length; i++) {
 			attrList[i] = c;
 			c = "" + (Integer.parseInt(c) + 1);
