@@ -1,9 +1,16 @@
 package uds.Grite;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,9 +31,12 @@ import java.util.StringTokenizer;
 public class Grite {
 
 	private Tools myTools;
-	private static int nbitems = 3;//10;//3;
-	private int nbtransaction = 9;//100;//9;
-	private float threshold = (float) 0.1; //default value
+	/*
+	 * private static int nbitems =10;//3; private int nbtransaction = 100;//9;
+	 */
+	private static int nbitems = 0;
+	private int nbtransaction = 0;
+	private double threshold = (float) 0.2; // 0.2 default value
 	/** the list of current itemsets */
 	public ArrayList<float[]> itemsets = new ArrayList<>();
 	// static Hashtable<String, int[][]> allContengent = new Hashtable<>();
@@ -37,13 +47,18 @@ public class Grite {
 	private SolutionMap GrdItem;
 	float[][] dataset;
 	float[] item;
-	private static int taille = 9;//100;// 9; 
-	int a = 3; 
-	private String transafile = "transa.dat";// "test.dat";//"gri/I4408.dat";// default transaction file
+	/*
+	 * private static int taille = 100;// 9;
+	 */ private static int taille = 0;
+	int a = 0;
+	private String transafile = "transa.dat";// "test.dat";
+	// "gri/I4408.dat";//
+	// default transaction file
 	private String configfile = "config.dat"; // default configuration file
 	private String outputfile = "ouput.dat";
 	private static String[] attrList;
 	private static ArrayList<String[]> semantique = new ArrayList<>();
+	private static ArrayList<String[]> candidates = new ArrayList<>();
 	// private static ArrayList<Integer> mySupports = new ArrayList<>();
 	/*
 	 * 1. Génération des 1-itemsets graduels : pour chaque item i de la base DB,
@@ -53,10 +68,18 @@ public class Grite {
 	ArrayList<Integer> removedindex;
 	private int niveau = 0;
 	private int numberPatterns = 0;
+	double min = (float) 0.1;
+	double max = (float) 0.3;
+	double pas = 0.01;
 
 	public Grite() throws IOException {
 		super();
 		myTools = new Tools();
+		myTools.initParameter(transafile);
+		taille = myTools.nbTransaction;
+		this.nbtransaction = myTools.nbTransaction;
+		nbitems = myTools.itemNembers;
+		a = nbitems;
 		GrdItem = new SolutionMap();
 		// construct db
 		getconfig();
@@ -65,19 +88,28 @@ public class Grite {
 		this.item = null;
 		this.dataset = Grite.duplique(itemsets);
 		// Grite.affiche(dataset);
-		exec();
+		/*FileWriter fw = new FileWriter(new File(outputfile));
+		fw.write("seuil" + "     " + "items" + " " + "transaction" + "  " + "duree" + " " + "  nombre de motif" + "\n");
+		fw.flush();
+		fw.write("\n");
+		fw.flush();
+		 exec(fw);*/
 
+		dataForDrawGraphe(min, max, pas);
 	}
 
-	public void exec() {
+	public void exec(FileWriter fw) {
+		double startTime = System.currentTimeMillis();
 		allContengent = createGradualsItemsetsOfSize1(dataset, item, a, taille);
-		//myTools.setSizeMat(allContengent.get(0).length);
-		//myTools.initMemory();
-		/*int[] memory0 = myTools.memory;
-		System.out.println("sons elt 1: "+myTools.getRoots(allContengent.get(0)));
-		System.out.println("sons elt 1: "+myTools.maximumSupport(allContengent.get(0), semantique.get(0), memory0) );
-		*/
-		//affiche(allContengent.get(0));
+		// myTools.setSizeMat(allContengent.get(0).length);
+		// myTools.initMemory();
+		/*
+		 * int[] memory0 = myTools.memory;
+		 * System.out.println("sons elt 1: "+myTools.getRoots(allContengent.get(
+		 * 0))); System.out.println("sons elt 1: "+myTools.maximumSupport(
+		 * allContengent.get(0), semantique.get(0), memory0) );
+		 */
+		// affiche(allContengent.get(0));
 		GrdItem.put("level " + getNiveau(), semantique);
 		System.out.println("level " + getNiveau() + "-------");
 		int i = 0;
@@ -88,9 +120,9 @@ public class Grite {
 			int[] memory = myTools.memory;
 			System.out.println(" -------> " + myTools.printGrad_Itemset(semantique.get(i)) + "( "
 					+ myTools.maximumSupport(is, semantique.get(i), memory) + " )" + " <----------- ");
-			//affiche(is);
+			/* affiche(is); */
 			System.out.println();
-			System.out.println("--------------------------------- size ("+is.length +" )");
+			System.out.println("--------------------------------- size (" + is.length + " )");
 			i++;
 
 		}
@@ -111,8 +143,9 @@ public class Grite {
 				int[] memory1 = myTools.memory;
 				System.out.println(" -------> " + myTools.printGrad_Itemset(semantique.get(i1)) + "( "
 						+ myTools.maximumSupport(is1, semantique.get(i1), memory1) + " )" + " <----------- ");
-				//affiche(is1);
-				System.out.println();
+				/*
+				 * affiche(is1); System.out.println();
+				 */
 				System.out.println("---------------------------------");
 				i1++;
 
@@ -120,8 +153,51 @@ public class Grite {
 
 		}
 
-		System.out.println(
-				"Grite.exec(), nombre total de motif extrait est de :" + getNumberPatterns() + GrdItem.get("level 1"));
+		System.out.println("Grite.exec(), nombre total de motif extrait est de :" + getNumberPatterns());
+		double duree = (System.currentTimeMillis() - startTime);
+		System.out.println("Grite.exec() Time execution eguals :" + duree / 1000.0 + " s");
+
+		try {
+			wrtiteStatistic(threshold, nbitems, nbtransaction, duree, getNumberPatterns(), fw);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @category statistics forage
+	 * @param nbitems2
+	 * @param nbtransaction2
+	 * @param duree
+	 * @param numberPatterns2
+	 * @throws IOException
+	 */
+	private void wrtiteStatistic(double seuil, int nbitems2, int nbtransaction2, double duree, int numberPatterns2,
+			FileWriter fw) throws IOException {
+
+		try {
+			String sep = "       ";
+			
+				fw.write(seuil + sep + nbitems2 + sep + nbtransaction2 + sep + (duree / 1000.0) + sep + numberPatterns2
+						+ "\n");
+				fw.flush();
+
+		} finally {
+		}
+	}
+
+	public void dataForDrawGraphe(double min, double max, double pas) throws IOException {
+		FileWriter fw = new FileWriter(new File(outputfile));
+		fw.write("seuil" + "     " + "items" + " " + "transaction" + "  " + "duree" + " " + "  nombre de motif" + "\n");
+		fw.flush();
+		fw.write("\n");
+		fw.flush();
+		for (double i = min; i <= max; i = (i +  pas)) {
+			threshold = i;
+			exec(fw);
+
+		}
+		fw.close();
 	}
 
 	/**
@@ -129,36 +205,41 @@ public class Grite {
 	 * 
 	 * @throws IOException
 	 */
+	/*
+	 * public void getconfig() throws IOException { FileInputStream file_in;
+	 * BufferedReader data_in; String oneLine = ""; // open the config file and
+	 * load the values try { file_in = new FileInputStream(configfile); data_in
+	 * = new BufferedReader(new InputStreamReader(file_in));
+	 * 
+	 * // number of transactions oneLine = data_in.readLine(); nbtransaction =
+	 * Integer.valueOf(oneLine).intValue();
+	 * 
+	 * // number of items oneLine = data_in.readLine(); nbitems =
+	 * Integer.valueOf(oneLine).intValue(); attrList =
+	 * Tools.attributenames(nbitems);// new String[nbitems];
+	 * 
+	 * // output configuration of the user
+	 * System.out.print("\nInput configuration: " + nbitems + " items,and  " +
+	 * nbtransaction + " transactions,mes caracteres : "); for (int j = 0; j <
+	 * attrList.length; j++) { System.out.print(attrList[j] + " ,"); }
+	 * System.out.println(); System.out.println(); for (int i = 0; i <
+	 * semantique.size(); i++) { System.out.println(semantique.get(i) + "  "); }
+	 * } catch (IOException e) { System.out.println(e); } }
+	 */
 	public void getconfig() throws IOException {
-		FileInputStream file_in;
-		BufferedReader data_in;
-		String oneLine = "";
-		// open the config file and load the values
-		try {
-			file_in = new FileInputStream(configfile);
-			data_in = new BufferedReader(new InputStreamReader(file_in));
-
-			// number of transactions
-			oneLine = data_in.readLine();
-			nbtransaction = Integer.valueOf(oneLine).intValue();
-
-			// number of items
-			oneLine = data_in.readLine();
-			nbitems = Integer.valueOf(oneLine).intValue();
-			attrList = Tools.attributenames(nbitems);// new String[nbitems];
-			
-			// output configuration of the user
-			System.out.print("\nInput configuration: " + nbitems + " items,and  " + nbtransaction + " transactions,mes caracteres : ");
-			for (int j = 0; j < attrList.length; j++) {
-				System.out.print( attrList[j] +" ,");
-			}System.out.println();
-			System.out.println();
-			for (int i = 0; i < semantique.size(); i++) {
-				System.out.println(semantique.get(i) + "  ");
-			}
-		} catch (IOException e) {
-			System.out.println(e);
+		attrList = Tools.attributenames(nbitems);// new String[nbitems];
+		// output configuration of the user
+		System.out.print(
+				"\n [ configuration: " + nbitems + " items,and  " + nbtransaction + " transactions,mes item sont : ");
+		for (int j = 0; j < attrList.length; j++) {
+			System.out.print(" ," + attrList[j]);
 		}
+		System.out.println("]");
+		System.out.println();
+		for (int i = 0; i < semantique.size(); i++) {
+			System.out.println(semantique.get(i) + "  ");
+		}
+
 	}
 
 	/**
@@ -250,6 +331,7 @@ public class Grite {
 	private ArrayList<boolean[][]> createGradualsItemsetsOfSize1(float[][] dataset, float[] item, int a, int taille) {
 		ArrayList<boolean[][]> allContengent = new ArrayList<>();
 		ArrayList<String[]> semantique = new ArrayList<>();
+		ArrayList<String[]> candidates = new ArrayList<>();
 		// ArrayList<Integer> mySupports = new ArrayList<>();
 		for (int i = 0; i < nbitems; i++) {
 			float[] rescol = Grite.getDataColByCol(dataset, item, i, taille);
@@ -269,6 +351,10 @@ public class Grite {
 					}
 				}
 			}
+			//add candidate
+			
+			candidates.add(attr);
+			
 			myTools.setSizeMat(Contengence1.length);
 			myTools.initMemory();
 			int[] memory = myTools.memory;
@@ -296,6 +382,9 @@ public class Grite {
 					}
 				}
 			}
+			
+			candidates.add(attr1);
+			
 			myTools.setSizeMat(Contengence2.length);
 			myTools.initMemory();
 			int[] memory1 = myTools.memory;
@@ -312,6 +401,8 @@ public class Grite {
 		GrdItem.put("level" + getNiveau(), semantique);
 		setNumberPatterns(getNumberPatterns() + semantique.size());
 		Grite.semantique = semantique;
+		Grite.candidates =candidates;
+		// System.out.println(candidates);
 		return allContengent;
 
 	}
@@ -354,16 +445,17 @@ public class Grite {
 		return isremoved;
 
 	}
-	
+
 	/**
 	 * @return the threshold
 	 */
-	public float getThreshold() {
+	public double getThreshold() {
 		return threshold;
 	}
 
 	/**
-	 * @param threshold the threshold to set
+	 * @param threshold
+	 *            the threshold to set
 	 */
 	public void setThreshold(float threshold) {
 		this.threshold = threshold;
@@ -377,7 +469,8 @@ public class Grite {
 	}
 
 	/**
-	 * @param taille the taille to set
+	 * @param taille
+	 *            the taille to set
 	 */
 	public void setTaille(int taille) {
 		this.taille = taille;
@@ -391,7 +484,8 @@ public class Grite {
 	}
 
 	/**
-	 * @param attrList the attrList to set
+	 * @param attrList
+	 *            the attrList to set
 	 */
 	public static void setAttrList(String[] attrList) {
 		Grite.attrList = attrList;
@@ -588,28 +682,27 @@ public class Grite {
 
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		//float[] item = new float[9];
+		// float[] item = new float[9];
 		Grite ap = new Grite();
-		
-		/*ap.getconfig();
-		ArrayList<float[]> itemsets = ap.itemsets;
+
+		/*
+		 * ap.getconfig(); ArrayList<float[]> itemsets = ap.itemsets;
 		 */
-		 /* for (ArrayList<Integer> arrayList : itemsets) { for (Integer integer
-		  : arrayList) { System.out.println("< "+integer+ " />"); } }*/
-		  
-		  /*float[][] dataset = ap.dataset;// Grite.duplique(itemsets); //
-		  Grite.affiche(ap.dataset); System.out.println();
-		  int a = 0; //
-		  float[] item = null; 
-		  int taille = 100; 
-		  Grite.getAllColum(dataset, item,
-		  a, taille); ap.grite_execution(); ArrayList<boolean[][]>
-		  allContengent = ap.createGradualsItemsetsOfSize1(dataset, item, 10,
-		  taille); 
-		  // ap.createGradualsItemsetsOfSize1(ap.dataset, item, 3,taille); 
-		  System.out.println( "Grite.main() " + allContengent.size()
-		  + " nombre de regle graduel semantique :" + semantique.size());
-		  System.out.println();
+		/*
+		 * for (ArrayList<Integer> arrayList : itemsets) { for (Integer integer
+		 * : arrayList) { System.out.println("< "+integer+ " />"); } }
+		 */
+
+		/*
+		 * float[][] dataset = ap.dataset;// Grite.duplique(itemsets); //
+		 * Grite.affiche(ap.dataset); System.out.println(); int a = 0; //
+		 * float[] item = null; int taille = 100; Grite.getAllColum(dataset,
+		 * item, a, taille); ap.grite_execution(); ArrayList<boolean[][]>
+		 * allContengent = ap.createGradualsItemsetsOfSize1(dataset, item, 10,
+		 * taille); // ap.createGradualsItemsetsOfSize1(ap.dataset, item,
+		 * 3,taille); System.out.println( "Grite.main() " + allContengent.size()
+		 * + " nombre de regle graduel semantique :" + semantique.size());
+		 * System.out.println();
 		 */
 
 	}
