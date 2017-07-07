@@ -167,9 +167,12 @@ public class Tools {
 	public ArrayList<Integer> getSonNode(boolean[][] boolMatrix, int item) {
 		ArrayList<Integer> sons = new ArrayList<>();
 		for (int i = 0; i < boolMatrix.length; i++) {
-			if (boolMatrix[item][i] == true) {
-				sons.add(i);
+			if (i != item) {
+				if (boolMatrix[item][i] == true) {
+					sons.add(i);
+				}
 			}
+			
 		}
 		return sons;
 
@@ -283,6 +286,30 @@ public class Tools {
 
 	}
 
+	boolean toEqualtabStrin(String[] val, String[] val1) {
+		boolean b = (val[0] == val1[0]);
+		for (int i = 1; i < val1.length; i++) {
+			b = b && (val[i] == val1[i]);
+
+		}
+
+		return b;
+	}
+
+	public boolean ApartientGen(ArrayList<String[]> filtre, String[] val) {
+		boolean b;
+		for (int i = 0; i < filtre.size(); i++) {
+			String[] tmp = filtre.get(i);
+			b = toEqualtabStrin(tmp, val);
+			if (b) {
+				return true;
+
+			}
+		}
+		return false;
+
+	}
+
 	/**
 	 * we changed Character[] by String[] due more than 9 attribut this
 	 * sequential representation begin impossible
@@ -307,6 +334,20 @@ public class Tools {
 
 		}
 
+	}
+
+	public ArrayList<String[]> cutListtoitem(String[] s) {
+		ArrayList<String[]> rt = new ArrayList<>();
+		
+		int j2 = 0;
+		while (j2 < s.length ) {
+			String[] stmp = new String[2];
+			stmp[0] = s[j2];
+			stmp[1] = s[j2 + 1];
+			rt.add(stmp);
+			j2 += 2;
+		}
+		return rt;
 	}
 
 	public ArrayList<String[]> genIndexUsed(ArrayList<String[]> unitem, ArrayList<String[]> unitemFreq) {
@@ -661,6 +702,60 @@ public class Tools {
 			}
 			break;
 
+		case 24:
+			for (int i = 0; i < 2; i++) {
+				for (int j = 2; j < 4; j++) {
+					for (int k = 4; k < 6; k++) {
+						for (int l = 6; l < 8; l++) {
+							for (int l2 = 8; l2 < 10; l2++) {
+								for (int m = 10; m < 12; m++) {
+									for (int m2 = 12; m2 < 14; m2++) {
+										for (int n = 14; n < 16; n++) {
+											for (int n3 = 16; n3 < 18; n3++) {
+												for (int o = 18; o < 20; o++) {
+													for (int o2 = 20; o2 < 22; o2++) {
+														for (int p = 22; p < 24; p++) {
+															boolean b = testitem(unitem.get(i)[0], unitem.get(j)[0],
+																	unitem.get(k)[0], unitem.get(l)[0],
+																	unitem.get(l2)[0], unitem.get(m)[0],
+																	unitem.get(m2)[0], unitem.get(n)[0],
+																	unitem.get(n3)[0], unitem.get(o)[0],
+																	unitem.get(o2)[0], unitem.get(p)[0]);
+															if (b) {
+																String[] add_f, add_fnxt;
+
+																add_f = Fusion(
+																		Fusion(Fusion(
+																				Fusion(Fusion(Fusion(Fusion(
+																						lexicalFusion(unitem.get(i),
+																								unitem.get(j)),
+																						unitem.get(k)), unitem.get(l)),
+																						unitem.get(l2)), unitem.get(m)),
+																				unitem.get(m2)), unitem.get(n)),
+																		unitem.get(n3));
+																add_fnxt = Fusion(Fusion(Fusion(add_f, unitem.get(o)),
+																		unitem.get(o2)), unitem.get(p));
+
+																valrtn.add(add_fnxt);
+															}
+														}
+
+													}
+												}
+											}
+										}
+
+									}
+
+								}
+							}
+						}
+					}
+
+				}
+			}
+			break;
+
 		default:
 			break;
 		}
@@ -695,5 +790,23 @@ public class Tools {
 		}
 		return r;
 	}
+
+	/*
+	 * private ArrayList<String[]> filterMaxItem(ArrayList<String[]>
+	 * src,ArrayList<String[]> filtre){ ArrayList<Integer> indices = new
+	 * ArrayList<>(); for (int i = 0; i < src.size(); i++) { String[] courant =
+	 * src.get(i); for (int j = 0; j < filtre.size(); j++) { for (int j2 = 0; j2
+	 * < (courant.length / 2); j2 = j2+2) { if (Apartient(filtre, )) {
+	 * 
+	 * } }
+	 * 
+	 * }
+	 * 
+	 * }
+	 * 
+	 * return filtre;
+	 * 
+	 * }
+	 */
 
 }
