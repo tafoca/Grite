@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.swing.JFrame;
+
 /**
  * 
  * @author The class encapsulates an implementation of the Grite algorithm to
@@ -35,8 +37,10 @@ public class Grite {
 	 * private static int nbitems =10;//3; private int nbtransaction = 100;//9;
 	 */
 	private static int nbitems = 0;
+	
 	private int nbtransaction = 0;
-	private double threshold = (float) 0.2; // 0.2 default value
+	
+	private double threshold = (float) 0.4; 
 	/** the list of current itemsets */
 	public ArrayList<float[]> itemsets = new ArrayList<>();
 	// static Hashtable<String, int[][]> allContengent = new Hashtable<>();
@@ -51,7 +55,7 @@ public class Grite {
 	 * private static int taille = 100;// 9;
 	 */ private static int taille = 0;
 	int a = 0;
-	private String transafile = "transa.dat";// "test.dat";
+	private String transafile = "transa1.dat"; //"transa.dat";// "test.dat";
 	// "gri/I4408.dat";//
 	// default transaction file
 	private String configfile = "config.dat"; // default configuration file
@@ -69,7 +73,7 @@ public class Grite {
 	private int niveau = 0;
 	private int numberPatterns = 0;
 	double min = (float) 0.1;
-	double max = (float) 0.3;
+	double max = (float) 0.8;
 	double pas = 0.01;
 
 	public Grite() throws IOException {
@@ -88,14 +92,14 @@ public class Grite {
 		this.item = null;
 		this.dataset = Grite.duplique(itemsets);
 		// Grite.affiche(dataset);
-		/*FileWriter fw = new FileWriter(new File(outputfile));
+		FileWriter fw = new FileWriter(new File(outputfile));
 		fw.write("seuil" + "     " + "items" + " " + "transaction" + "  " + "duree" + " " + "  nombre de motif" + "\n");
 		fw.flush();
 		fw.write("\n");
 		fw.flush();
-		 exec(fw);*/
+		exec(fw);
 
-		dataForDrawGraphe(min, max, pas);
+		//dataForDrawGraphe(min, max, pas);
 	}
 
 	public void exec(FileWriter fw) {
@@ -109,7 +113,7 @@ public class Grite {
 		 * 0))); System.out.println("sons elt 1: "+myTools.maximumSupport(
 		 * allContengent.get(0), semantique.get(0), memory0) );
 		 */
-		// affiche(allContengent.get(0));
+		//affiche(allContengent.get(0));
 		GrdItem.put("level " + getNiveau(), semantique);
 		System.out.println("level " + getNiveau() + "-------");
 		int i = 0;
@@ -120,7 +124,7 @@ public class Grite {
 			int[] memory = myTools.memory;
 			System.out.println(" -------> " + myTools.printGrad_Itemset(semantique.get(i)) + "( "
 					+ myTools.maximumSupport(is, semantique.get(i), memory) + " )" + " <----------- ");
-			/* affiche(is); */
+			//affiche(is);
 			System.out.println();
 			System.out.println("--------------------------------- size (" + is.length + " )");
 			i++;
@@ -128,28 +132,33 @@ public class Grite {
 		}
 		for (int m = 1; m < attrList.length; m++) {
 			allContengent = grite_execution();
-			GrdItem.put("level " + getNiveau(), semantique);
-			System.out.println("level " + getNiveau() + "-------");
-			// Grite.affiche(allContengent.get(0));
-			// System.out.println("---- Grite.Grite()---- " +
-			// allContengent.size() + "***" + semantique.size());
-			// System.out.println("***" + GrdItem.toString());
+			if (allContengent.size() > 0) {
+				GrdItem.put("level " + getNiveau(), semantique);
+				System.out.println("level " + getNiveau() + "-------");
+				System.out.println("la taille de l'ensemble des frequent candidat = " +allContengent.size());
+				//Grite.affiche(allContengent.get(0));
+				// System.out.println("---- Grite.Grite()---- " +
+				// allContengent.size() + "***" + semantique.size());
+				// System.out.println("***" + GrdItem.toString());
 
-			int i1 = 0;
-			for (Iterator<boolean[][]> iterator = (allContengent).iterator(); iterator.hasNext();) {
-				boolean[][] is1 = (boolean[][]) iterator.next();
-				myTools.setSizeMat(is1.length);
-				myTools.initMemory();
-				int[] memory1 = myTools.memory;
-				System.out.println(" -------> " + myTools.printGrad_Itemset(semantique.get(i1)) + "( "
-						+ myTools.maximumSupport(is1, semantique.get(i1), memory1) + " )" + " <----------- ");
-				/*
-				 * affiche(is1); System.out.println();
-				 */
-				System.out.println("---------------------------------");
-				i1++;
+				int i1 = 0;
+				for (Iterator<boolean[][]> iterator = (allContengent).iterator(); iterator.hasNext();) {
+					boolean[][] is1 = (boolean[][]) iterator.next();
+					myTools.setSizeMat(is1.length);
+					myTools.initMemory();
+					int[] memory1 = myTools.memory;
+					System.out.println(" -------> " + myTools.printGrad_Itemset(semantique.get(i1)) + "( "
+							+ myTools.maximumSupport(is1, semantique.get(i1), memory1) + " )" + " <----------- ");
 
+					//affiche(is1);
+					System.out.println();
+
+					System.out.println("---------------------------------");
+					i1++;
+
+				}
 			}
+			
 
 		}
 
@@ -177,10 +186,10 @@ public class Grite {
 
 		try {
 			String sep = "       ";
-			
-				fw.write(seuil + sep + nbitems2 + sep + nbtransaction2 + sep + (duree / 1000.0) + sep + numberPatterns2
-						+ "\n");
-				fw.flush();
+
+			fw.write(seuil + sep + nbitems2 + sep + nbtransaction2 + sep + (duree / 1000.0) + sep + numberPatterns2
+					+ "\n");
+			fw.flush();
 
 		} finally {
 		}
@@ -192,7 +201,7 @@ public class Grite {
 		fw.flush();
 		fw.write("\n");
 		fw.flush();
-		for (double i = min; i <= max; i = (i +  pas)) {
+		for (double i = min; i <= max; i = (i + pas)) {
 			threshold = i;
 			exec(fw);
 
@@ -205,27 +214,7 @@ public class Grite {
 	 * 
 	 * @throws IOException
 	 */
-	/*
-	 * public void getconfig() throws IOException { FileInputStream file_in;
-	 * BufferedReader data_in; String oneLine = ""; // open the config file and
-	 * load the values try { file_in = new FileInputStream(configfile); data_in
-	 * = new BufferedReader(new InputStreamReader(file_in));
-	 * 
-	 * // number of transactions oneLine = data_in.readLine(); nbtransaction =
-	 * Integer.valueOf(oneLine).intValue();
-	 * 
-	 * // number of items oneLine = data_in.readLine(); nbitems =
-	 * Integer.valueOf(oneLine).intValue(); attrList =
-	 * Tools.attributenames(nbitems);// new String[nbitems];
-	 * 
-	 * // output configuration of the user
-	 * System.out.print("\nInput configuration: " + nbitems + " items,and  " +
-	 * nbtransaction + " transactions,mes caracteres : "); for (int j = 0; j <
-	 * attrList.length; j++) { System.out.print(attrList[j] + " ,"); }
-	 * System.out.println(); System.out.println(); for (int i = 0; i <
-	 * semantique.size(); i++) { System.out.println(semantique.get(i) + "  "); }
-	 * } catch (IOException e) { System.out.println(e); } }
-	 */
+	
 	public void getconfig() throws IOException {
 		attrList = Tools.attributenames(nbitems);// new String[nbitems];
 		// output configuration of the user
@@ -337,30 +326,39 @@ public class Grite {
 			float[] rescol = Grite.getDataColByCol(dataset, item, i, taille);
 			String[] attr = new String[2];
 			attr[0] = attrList[i];
-			attr[1] = "+";
+			attr[1] = "-";
 			// gestion objets croissant X> et creation matrice contigence
 			// associe
 			boolean[][] Contengence1 = new boolean[taille][taille];
 
 			for (int j = 0; j < taille; j++) {
-				for (int j2 = j + 1; j2 < taille; j2++) {
-					if (rescol[j] < rescol[j2]) {
-						Contengence1[j][j2] = true;
-					} else {
-						Contengence1[j][j2] = false;
+
+				Contengence1[j][j] = false;
+			}
+
+			for (int j = 0; j < taille; j++) {
+				for (int j2 = 0; j2 < taille; j2++) {
+					if (j != j2) {
+						if (rescol[j] < rescol[j2]) {
+							Contengence1[j][j2] = true;
+						} else {
+							Contengence1[j][j2] = false;
+						}
 					}
+
 				}
 			}
-			//add candidate
-			
+			// add candidate
+
 			candidates.add(attr);
-			
+
 			myTools.setSizeMat(Contengence1.length);
 			myTools.initMemory();
 			int[] memory = myTools.memory;
 			int cpt = myTools.maximumSupport(Contengence1, attr, memory);
-			float support = myTools.supportCalculation(cpt, Contengence1.length);
-			if (support > this.threshold) {
+			float support = myTools.supportCalculation(cpt, taille);
+			System.out.println("Grite.createGradualsItemsetsOfSize1()-1 : " + support+ ":"+cpt+ "taille:"+taille);
+			if (support >= this.threshold) {
 				allContengent.add(Contengence1);
 				semantique.add(attr);
 				// mySupports.add(cpt);
@@ -370,27 +368,36 @@ public class Grite {
 			// associe
 			String[] attr1 = new String[2];
 			attr1[0] = attrList[i];
-			attr1[1] = "-";
+			attr1[1] = "+";
 			boolean[][] Contengence2 = new boolean[taille][taille];
 
 			for (int j = 0; j < taille; j++) {
-				for (int j2 = j + 1; j2 < taille; j2++) {
-					if (rescol[j] > rescol[j2]) {
-						Contengence2[j][j2] = true;
-					} else {
-						Contengence2[j][j2] = false;
+
+				Contengence2[j][j] = false;
+			}
+
+			for (int j = 0; j < taille; j++) {
+				for (int j2 = 0 ; j2 < taille; j2++) {
+					if (j != j2) {
+						if (rescol[j] > rescol[j2]) {
+							Contengence2[j][j2] = true;
+						} else {
+							Contengence2[j][j2] = false;
+						}
 					}
 				}
 			}
-			
+
 			candidates.add(attr1);
-			
+
 			myTools.setSizeMat(Contengence2.length);
 			myTools.initMemory();
 			int[] memory1 = myTools.memory;
 			int cpt1 = myTools.maximumSupport(Contengence2, attr1, memory1);
-			float support1 = myTools.supportCalculation(cpt1, Contengence2.length);
-			if (support1 > this.threshold) {
+			float support1 = myTools.supportCalculation(cpt1, taille);
+			System.out.println("Grite.createGradualsItemsetsOfSize1()-2 : " + support1+ ":"+cpt1);
+
+			if (support1 >= this.threshold) {
 				allContengent.add(Contengence2);
 				semantique.add(attr1);
 				// mySupports.add(cpt1);
@@ -401,7 +408,7 @@ public class Grite {
 		GrdItem.put("level" + getNiveau(), semantique);
 		setNumberPatterns(getNumberPatterns() + semantique.size());
 		Grite.semantique = semantique;
-		Grite.candidates =candidates;
+		Grite.candidates = candidates;
 		// System.out.println(candidates);
 		return allContengent;
 
@@ -410,8 +417,8 @@ public class Grite {
 	public static boolean[][] jointure(boolean[][] m1, boolean[][] m2) {
 		boolean[][] res = new boolean[m1.length][m1.length];
 
-		for (int i = 0; i < res.length; i++) {
-			for (int j = 0; j < res.length; j++) {
+		for (int i = 0; i < m1.length; i++) {
+			for (int j = 0; j < m1.length; j++) {
 				res[i][j] = (m1[i][j] & m2[i][j]);
 			}
 		}
@@ -524,7 +531,7 @@ public class Grite {
 					tmp1 = myTools.lexicalFusion(semantique.get(i), semantique.get(j));
 					tmp2 = Grite.jointure(allContengent.get(i), allContengent.get(j));
 					myTools.setSizeMat(tmp2.length);
-					// myTools.initMemory();
+					 myTools.initMemory();
 					int[] memory = myTools.memory;
 					cpt = myTools.maximumSupport(tmp2, tmp1, memory);
 					support = myTools.supportCalculation(cpt, tmp2.length);
@@ -681,29 +688,8 @@ public class Grite {
 	}
 
 	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
-		// float[] item = new float[9];
+		System.out.println("entrer la valeur minimal du seiul smin");
 		Grite ap = new Grite();
-
-		/*
-		 * ap.getconfig(); ArrayList<float[]> itemsets = ap.itemsets;
-		 */
-		/*
-		 * for (ArrayList<Integer> arrayList : itemsets) { for (Integer integer
-		 * : arrayList) { System.out.println("< "+integer+ " />"); } }
-		 */
-
-		/*
-		 * float[][] dataset = ap.dataset;// Grite.duplique(itemsets); //
-		 * Grite.affiche(ap.dataset); System.out.println(); int a = 0; //
-		 * float[] item = null; int taille = 100; Grite.getAllColum(dataset,
-		 * item, a, taille); ap.grite_execution(); ArrayList<boolean[][]>
-		 * allContengent = ap.createGradualsItemsetsOfSize1(dataset, item, 10,
-		 * taille); // ap.createGradualsItemsetsOfSize1(ap.dataset, item,
-		 * 3,taille); System.out.println( "Grite.main() " + allContengent.size()
-		 * + " nombre de regle graduel semantique :" + semantique.size());
-		 * System.out.println();
-		 */
 
 	}
 }
